@@ -9,6 +9,7 @@ export interface Profile {
     linkedinUrl: string | null;
     twitterUrl: string | null;
     cvUrl: string | null;
+    cvViewUrl: string | null;
     email: string | null;
     createdAt: Date;
     updatedAt: Date;

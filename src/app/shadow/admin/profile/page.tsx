@@ -12,6 +12,7 @@ interface Profile {
     linkedinUrl: string;
     twitterUrl: string;
     cvUrl: string;
+    cvViewUrl: string;
     email: string;
 }
 
@@ -25,6 +26,7 @@ export default function AdminProfilePage() {
         linkedinUrl: "",
         twitterUrl: "",
         cvUrl: "",
+        cvViewUrl: "",
         email: "",
     });
     const [saving, setSaving] = useState(false);
@@ -162,12 +164,23 @@ export default function AdminProfilePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-2">CV/Resume URL</label>
+                            <label className="block text-sm font-medium mb-2">CV View URL</label>
+                            <input
+                                type="url"
+                                value={profile.cvViewUrl}
+                                onChange={(e) => setProfile({ ...profile, cvViewUrl: e.target.value })}
+                                placeholder="Link to view CV online (e.g., Google Drive preview)"
+                                className="input"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-2">CV Download URL</label>
                             <input
                                 type="url"
                                 value={profile.cvUrl}
                                 onChange={(e) => setProfile({ ...profile, cvUrl: e.target.value })}
-                                placeholder="Link to your CV PDF"
+                                placeholder="Direct link to download CV PDF"
                                 className="input"
                             />
                         </div>

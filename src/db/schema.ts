@@ -13,7 +13,8 @@ export const profile = pgTable("profile", {
     githubUrl: text("github_url"),
     linkedinUrl: text("linkedin_url"),
     twitterUrl: text("twitter_url"),
-    cvUrl: text("cv_url"), // Link to CV PDF
+    cvUrl: text("cv_url"), // Link to download CV PDF
+    cvViewUrl: text("cv_view_url"), // Link to view CV online
     email: text("email"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

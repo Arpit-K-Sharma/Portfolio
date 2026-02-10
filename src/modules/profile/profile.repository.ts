@@ -20,8 +20,8 @@ export const profileRepository = {
 
         // Sanitize data -> remove id, createdAt, updatedAt if present
         // (even though ProfileInsert omits them, runtime object might have them)
-        const { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, email } = data as any;
-        const cleanData = { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, email };
+        const { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, cvViewUrl, email } = data as any;
+        const cleanData = { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, cvViewUrl, email };
 
         if (existing) {
             const result = await db
@@ -44,7 +44,7 @@ export const profileRepository = {
      */
     async update(id: string, data: ProfileUpdate) {
         // Sanitize data
-        const { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, email } = data as any;
+        const { name, title, bio, avatarUrl, githubUrl, linkedinUrl, twitterUrl, cvUrl, cvViewUrl, email } = data as any;
         // Only include defined fields
         const cleanData: any = {};
         if (name !== undefined) cleanData.name = name;
@@ -55,6 +55,7 @@ export const profileRepository = {
         if (linkedinUrl !== undefined) cleanData.linkedinUrl = linkedinUrl;
         if (twitterUrl !== undefined) cleanData.twitterUrl = twitterUrl;
         if (cvUrl !== undefined) cleanData.cvUrl = cvUrl;
+        if (cvViewUrl !== undefined) cleanData.cvViewUrl = cvViewUrl;
         if (email !== undefined) cleanData.email = email;
 
         const result = await db

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
     title: "Arpit Sharma | Portfolio",
@@ -21,8 +23,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <body className="min-h-screen bg-background">
-                <Providers>{children}</Providers>
+            <body className="min-h-screen bg-background flex flex-col">
+                <Providers>
+                    <Navbar />
+                    <div className="flex-1">{children}</div>
+                    <Footer />
+                </Providers>
             </body>
         </html>
     );
