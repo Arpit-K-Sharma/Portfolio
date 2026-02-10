@@ -56,6 +56,7 @@ export const projects = pgTable("projects", {
     thumbnailUrl: text("thumbnail_url"),
     githubUrl: text("github_url"),
     demoUrl: text("demo_url"),
+    docsUrl: text("docs_url"),
     youtubeUrl: text("youtube_url"),
     isFeatured: boolean("is_featured").default(false).notNull(),
     displayOrder: integer("display_order").default(0).notNull(),

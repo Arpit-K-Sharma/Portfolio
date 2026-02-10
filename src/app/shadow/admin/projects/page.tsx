@@ -23,8 +23,9 @@ interface Project {
     fullDescription: string;
     thumbnailUrl: string;
     githubUrl: string;
-    demoUrl: string;
-    youtubeUrl: string;
+    demoUrl: string | null;
+    docsUrl: string | null;
+    youtubeUrl: string | null;
     isFeatured: boolean;
     displayOrder: number;
     skills: Skill[];
@@ -44,6 +45,7 @@ export default function AdminProjectsPage() {
         thumbnailUrl: "",
         githubUrl: "",
         demoUrl: "",
+        docsUrl: "",
         youtubeUrl: "",
         isFeatured: false,
         displayOrder: 0,
@@ -75,6 +77,7 @@ export default function AdminProjectsPage() {
             thumbnailUrl: "",
             githubUrl: "",
             demoUrl: "",
+            docsUrl: "",
             youtubeUrl: "",
             isFeatured: false,
             displayOrder: 0,
@@ -93,6 +96,7 @@ export default function AdminProjectsPage() {
             thumbnailUrl: project.thumbnailUrl || "",
             githubUrl: project.githubUrl || "",
             demoUrl: project.demoUrl || "",
+            docsUrl: project.docsUrl || "",
             youtubeUrl: project.youtubeUrl || "",
             isFeatured: project.isFeatured,
             displayOrder: project.displayOrder,
@@ -175,13 +179,17 @@ export default function AdminProjectsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Full Description</label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium">Full Description</label>
+                                    <span className="text-xs text-foreground-muted">Markdown Supported</span>
+                                </div>
                                 <textarea
-                                    rows={5}
+                                    rows={15}
                                     value={form.fullDescription}
                                     onChange={(e) => setForm({ ...form, fullDescription: e.target.value })}
-                                    className="input resize-none"
+                                    className="input resize-y font-mono text-sm leading-relaxed"
                                     required
+                                    placeholder="# Project Title\n\nWrite your description in Markdown..."
                                 />
                             </div>
 
@@ -208,6 +216,15 @@ export default function AdminProjectsPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
+                                    <label className="block text-sm font-medium mb-2">Docs URL</label>
+                                    <input
+                                        type="url"
+                                        value={form.docsUrl}
+                                        onChange={(e) => setForm({ ...form, docsUrl: e.target.value })}
+                                        className="input"
+                                    />
+                                </div>
+                                <div>
                                     <label className="block text-sm font-medium mb-2">YouTube URL</label>
                                     <input
                                         type="url"
@@ -216,15 +233,16 @@ export default function AdminProjectsPage() {
                                         className="input"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Thumbnail URL</label>
-                                    <input
-                                        type="url"
-                                        value={form.thumbnailUrl}
-                                        onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
-                                        className="input"
-                                    />
-                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Thumbnail URL</label>
+                                <input
+                                    type="url"
+                                    value={form.thumbnailUrl}
+                                    onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
+                                    className="input"
+                                />
                             </div>
 
 

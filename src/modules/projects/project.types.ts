@@ -11,6 +11,7 @@ export interface Project {
     thumbnailUrl: string | null;
     githubUrl: string | null;
     demoUrl: string | null;
+    docsUrl: string | null;
     youtubeUrl: string | null;
     isFeatured: boolean;
     displayOrder: number;
