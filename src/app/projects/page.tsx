@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { projectService } from "@/modules/projects";
 import { categoryService } from "@/modules/categories";
 import { skillService } from "@/modules/skills";
@@ -55,7 +56,9 @@ export default async function ProjectsPage({
             {enableSearchFilters && (
                 <section className="pb-8">
                     <div className="container-custom">
-                        <ProjectSearchFilters categories={categories} skills={skills} />
+                        <Suspense fallback={<div className="h-20 animate-pulse bg-white/5 rounded-xl max-w-5xl mx-auto" />}>
+                            <ProjectSearchFilters categories={categories} skills={skills} />
+                        </Suspense>
                     </div>
                 </section>
             )}
