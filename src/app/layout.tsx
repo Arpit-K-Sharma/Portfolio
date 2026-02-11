@@ -4,6 +4,8 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 
+import { profileService } from "@/modules/profile";
+
 export const metadata: Metadata = {
     title: "Arpit Sharma | Portfolio",
     description: "Blockchain & Full-Stack Developer portfolio showcasing projects in Web3, DeFi, and modern web applications.",
@@ -16,18 +18,21 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const profile = await profileService.getProfile();
+    const name = profile?.name || "Portfolio";
+
     return (
         <html lang="en" className="dark">
             <body className="min-h-screen bg-background flex flex-col">
                 <Providers>
-                    <Navbar />
+                    <Navbar name={name} />
                     <div className="flex-1">{children}</div>
-                    <Footer />
+                    <Footer name={name} />
                 </Providers>
             </body>
         </html>

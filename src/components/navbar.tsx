@@ -10,7 +10,7 @@ const navLinks = [
     { href: "/contact", label: "Contact" },
 ];
 
-export function Navbar() {
+export function Navbar({ name }: { name?: string | null }) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -24,7 +24,7 @@ export function Navbar() {
                     <div className="flex items-center justify-between">
                         {/* Logo */}
                         <Link href="/" className="text-lg font-bold gradient-text animate-shimmer">
-                            Arpit Sharma
+                            {name || "Portfolio"}
                         </Link>
 
                         {/* Desktop Nav */}
@@ -40,8 +40,8 @@ export function Navbar() {
                                         key={link.href}
                                         href={link.href}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                                                ? "text-foreground bg-white/[0.08]"
-                                                : "text-foreground-muted hover:text-foreground hover:bg-white/[0.04]"
+                                            ? "text-foreground bg-white/[0.08]"
+                                            : "text-foreground-muted hover:text-foreground hover:bg-white/[0.04]"
                                             }`}
                                     >
                                         {link.label}
@@ -82,8 +82,8 @@ export function Navbar() {
                                             href={link.href}
                                             onClick={() => setMobileOpen(false)}
                                             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                                                    ? "text-foreground bg-white/[0.08]"
-                                                    : "text-foreground-muted hover:text-foreground hover:bg-white/[0.04]"
+                                                ? "text-foreground bg-white/[0.08]"
+                                                : "text-foreground-muted hover:text-foreground hover:bg-white/[0.04]"
                                                 }`}
                                         >
                                             {link.label}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function Footer() {
+export function Footer({ name }: { name?: string | null }) {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/shadow");
 
@@ -19,7 +19,7 @@ export function Footer() {
                     {/* Brand */}
                     <div className="flex flex-col items-center md:items-start gap-2">
                         <Link href="/" className="text-lg font-bold gradient-text">
-                            Arpit Sharma
+                            {name || "Portfolio"}
                         </Link>
                         <p className="text-sm text-foreground-subtle">
                             Building the future, one commit at a time.
@@ -56,7 +56,7 @@ export function Footer() {
                 {/* Bottom */}
                 <div className="mt-8 pt-6 border-t border-white/[0.04] text-center">
                     <p className="text-xs text-foreground-subtle">
-                        © {new Date().getFullYear()} Arpit Sharma. All rights reserved.
+                        © {new Date().getFullYear()} {name || "Portfolio"}. All rights reserved.
                     </p>
                 </div>
             </div>
