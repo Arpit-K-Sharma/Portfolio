@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { settingsService } from "@/modules/settings";
+import { Setting } from "@/modules/settings/settings.types";
 
 export async function GET() {
     const session = await auth();
@@ -9,11 +10,11 @@ export async function GET() {
     }
 
     try {
-        const settings = await settingsService.getAllSettings();
-        const settingsMap = settings.reduce((acc, setting) => {
+        const settings = (await settingsService.getAllSettings()) as Setting[];
+        const settingsMap = settings.reduce<Record<string, string>>((acc, setting) => {
             acc[setting.key] = setting.value;
             return acc;
-        }, {} as Record<string, string>);
+        }, {});
 
         return NextResponse.json(settingsMap);
     } catch (error) {
