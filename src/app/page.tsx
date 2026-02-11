@@ -234,31 +234,24 @@ export default async function HomePage() {
                     </div>
 
                     {Object.entries(skillsByCategory).length > 0 ? (
-                        <div className="space-y-10">
+                        <div className="space-y-6">
                             {Object.entries(skillsByCategory).map(([categoryName, categorySkills], catIdx) => (
                                 <div key={categoryName} className={`animate-in delay-${Math.min((catIdx + 1) * 100, 500)}`}>
-                                    <h3 className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-5 flex items-center gap-3">
-                                        <span className="w-8 h-px bg-primary/40" />
+                                    <h3 className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-3 flex items-center gap-3">
+                                        <span className="w-6 h-px bg-primary/40" />
                                         {categoryName}
                                         <span className="text-foreground-subtle font-normal">({categorySkills.length})</span>
                                     </h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                        {categorySkills.map((skill, skillIdx) => (
+                                    <div className="flex flex-wrap gap-2">
+                                        {categorySkills.map((skill) => (
                                             <div
                                                 key={skill.id}
-                                                className="group relative flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1 cursor-default"
-                                                style={{ animationDelay: `${(catIdx * 200) + (skillIdx * 50)}ms` }}
+                                                className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.08] hover:border-primary/30 transition-all duration-200 cursor-default"
                                             >
-                                                {/* Hover glow */}
-                                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                <div className="relative z-10 flex flex-col items-center gap-2.5">
-                                                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.04] group-hover:bg-white/[0.08] transition-colors duration-300">
-                                                        <SkillIcon icon={skill.iconUrl} alt={skill.name} className="w-6 h-6" />
-                                                    </div>
-                                                    <span className="text-sm text-foreground-muted group-hover:text-foreground transition-colors duration-300 text-center leading-tight">
-                                                        {skill.name}
-                                                    </span>
-                                                </div>
+                                                <SkillIcon icon={skill.iconUrl} alt={skill.name} className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                <span className="text-sm text-foreground-muted group-hover:text-foreground transition-colors">
+                                                    {skill.name}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>

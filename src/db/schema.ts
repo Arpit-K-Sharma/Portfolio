@@ -104,6 +104,16 @@ export const contactMessages = pgTable("contact_messages", {
 });
 
 // ======================
+// Settings Table
+// ======================
+export const settings = pgTable("settings", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    key: text("key").notNull().unique(),
+    value: text("value").notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ======================
 // Relations
 // ======================
 export const projectsRelations = relations(projects, ({ many }) => ({

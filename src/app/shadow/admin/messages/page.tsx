@@ -102,7 +102,9 @@ export default function AdminMessagesPage() {
 
                             <div className="flex gap-4 pt-4 border-t border-border">
                                 <a
-                                    href={`mailto:${message.senderEmail}?subject=Re: Contact from Portfolio`}
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(message.senderEmail)}&su=${encodeURIComponent('Re: Contact from Portfolio')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="btn-primary text-sm"
                                 >
                                     Reply via Email

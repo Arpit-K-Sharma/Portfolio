@@ -2,6 +2,7 @@ import Link from "next/link";
 import { projectService } from "@/modules/projects";
 import { categoryService } from "@/modules/categories";
 import { skillService } from "@/modules/skills";
+import { settingsService } from "@/modules/settings";
 import { SkillIcon } from "@/components/skill-icon";
 import { ProjectSearchFilters } from "@/components/project-search-filters";
 
@@ -13,20 +14,23 @@ export const metadata = {
 export default async function ProjectsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ category?: string; search?: string; skill?: string }>;
+    searchParams: { search?: string; categories?: string; skills?: string };
 }) {
-    const params = await searchParams;
+    const search = searchParams.search || "";
+    const categorySlugs = searchParams.categories?.split(",").filter(Boolean) || [];
+    const skillSlugs = searchParams.skills?.split(",").filter(Boolean) || [];
 
-    // Fetch Data
-    const [projects, categories, skills] = await Promise.all([
-        projectService.getAllProjects({
-            search: params.search,
-            categorySlug: params.category,
-            skillSlugs: params.skill ? [params.skill] : undefined,
-        }),
-        categoryService.getAllVisibleCategories(),
-        skillService.getAllSkills(),
-    ]);
+    // Fetch settings
+    const enableSearchFilters = await settingsService.isSearchFiltersEnabled();
+
+    // Fetch data
+    const projects = await projectService.getAllProjects({
+        search,
+        categorySlugs,
+        skillSlugs,
+    });
+    const categories = await categoryService.getAllVisibleCategories();
+    const skills = await skillService.getAllSkills();
 
     return (
         <main className="min-h-screen pt-24">
@@ -48,11 +52,13 @@ export default async function ProjectsPage({
             </section>
 
             {/* Filters */}
-            <section className="pb-8">
-                <div className="container-custom">
-                    <ProjectSearchFilters categories={categories} skills={skills} />
-                </div>
-            </section>
+            {enableSearchFilters && (
+                <section className="pb-8">
+                    <div className="container-custom">
+                        <ProjectSearchFilters categories={categories} skills={skills} />
+                    </div>
+                </section>
+            )}
 
             {/* Projects Grid */}
             <section className="pb-20">
@@ -73,7 +79,7 @@ export default async function ProjectsPage({
                                 <Link
                                     key={project.id}
                                     href={`/projects/${project.slug}`}
-                                    className={`glass-card group block animate-in delay-${Math.min((i + 1) * 100, 700)}`}
+                                    className={`glass-card group block animate-in delay-${Math.min((i + 1) * 100, 700)} hover:border-primary/30 transition-all duration-300`}
                                 >
                                     {/* Thumbnail */}
                                     <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-5 overflow-hidden relative">
@@ -81,20 +87,25 @@ export default async function ProjectsPage({
                                             <img
                                                 src={project.thumbnailUrl}
                                                 alt={project.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
-                                                <span className="text-4xl opacity-30">🚀</span>
+                                                <span className="text-5xl opacity-20 group-hover:opacity-30 transition-opacity">🚀</span>
                                             </div>
                                         )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                                            <span className="text-sm font-medium text-primary">View Details →</span>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
+                                            <span className="text-sm font-semibold text-primary flex items-center gap-2">
+                                                View Details
+                                                <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </span>
                                         </div>
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors duration-300">
+                                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">
                                         {project.title}
                                     </h3>
                                     <p className="text-foreground-muted text-sm mb-4 line-clamp-2 leading-relaxed">
@@ -104,25 +115,28 @@ export default async function ProjectsPage({
                                     {/* Categories */}
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         {project.categories.map((cat) => (
-                                            <span key={cat.id} className="badge text-xs">{cat.name}</span>
+                                            <span key={cat.id} className="badge text-xs bg-primary/10 text-primary border-primary/20">{cat.name}</span>
                                         ))}
                                     </div>
 
-                                    {/* Skills */}
-                                    <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/[0.06]">
-                                        {project.skills.slice(0, 4).map((skill) => (
-                                            <span
+                                    {/* Skills - Icon Only */}
+                                    <div className="flex items-center gap-1.5 pt-4 border-t border-white/[0.08]">
+                                        {project.skills.slice(0, 8).map((skill) => (
+                                            <div
                                                 key={skill.id}
-                                                className="text-xs text-foreground-subtle bg-white/[0.04] px-2.5 py-1 rounded-lg flex items-center gap-1.5"
+                                                title={skill.name}
+                                                className="w-8 h-8 rounded-lg bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.1] hover:border-primary/40 flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-help group/skill"
                                             >
-                                                <SkillIcon icon={skill.iconUrl} alt={skill.name} className="w-3 h-3" />
-                                                {skill.name}
-                                            </span>
+                                                <SkillIcon icon={skill.iconUrl} alt={skill.name} className="w-4.5 h-4.5 opacity-90 group-hover/skill:opacity-100" />
+                                            </div>
                                         ))}
-                                        {project.skills.length > 4 && (
-                                            <span className="text-xs text-foreground-subtle bg-white/[0.04] px-2.5 py-1 rounded-lg">
-                                                +{project.skills.length - 4}
-                                            </span>
+                                        {project.skills.length > 8 && (
+                                            <div
+                                                title={`${project.skills.length - 8} more skills`}
+                                                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[10px] font-semibold text-foreground-muted cursor-help"
+                                            >
+                                                +{project.skills.length - 8}
+                                            </div>
                                         )}
                                     </div>
                                 </Link>

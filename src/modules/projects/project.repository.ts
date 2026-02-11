@@ -13,7 +13,7 @@ export const projectRepository = {
      */
     async getAll(filters: {
         search?: string;
-        categorySlug?: string;
+        categorySlugs?: string[];
         skillSlugs?: string[];
     } = {}): Promise<ProjectWithRelations[]> {
         const conditions = [];
@@ -29,8 +29,8 @@ export const projectRepository = {
             );
         }
 
-        // Category Filter
-        if (filters.categorySlug) {
+        // Category Filter (OR logic)
+        if (filters.categorySlugs && filters.categorySlugs.length > 0) {
             conditions.push(
                 exists(
                     db.select()
@@ -38,7 +38,7 @@ export const projectRepository = {
                         .innerJoin(categories, eq(projectCategories.categoryId, categories.id))
                         .where(and(
                             eq(projectCategories.projectId, projects.id),
-                            eq(categories.slug, filters.categorySlug)
+                            inArray(categories.slug, filters.categorySlugs)
                         ))
                 )
             );
