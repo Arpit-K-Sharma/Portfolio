@@ -127,6 +127,7 @@ export default function AdminProjectsPage() {
             resetForm();
         } catch (error) {
             console.error("Error saving project:", error);
+            alert("Failed to save project. " + (error as Error).message);
         } finally {
             setSaving(false);
         }
@@ -137,6 +138,21 @@ export default function AdminProjectsPage() {
 
         await fetch(`/api/shadow/admin/projects/${id}`, { method: "DELETE" });
         await fetchData();
+    };
+
+    // Inline update for featured toggle and display order
+    const handleInlineUpdate = async (id: string, field: string, value: boolean | number) => {
+        try {
+            await fetch(`/api/shadow/admin/projects/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ [field]: value }),
+            });
+            await fetchData();
+        } catch (error) {
+            console.error("Error updating project:", error);
+            alert(`Failed to update ${field}. ${(error as Error).message}`);
+        }
     };
 
     return (
@@ -152,9 +168,20 @@ export default function AdminProjectsPage() {
             {showForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-background-secondary rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-                        <h2 className="text-xl font-semibold mb-4">
-                            {editing ? "Edit Project" : "New Project"}
-                        </h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold">
+                                {editing ? "Edit Project" : "New Project"}
+                            </h2>
+                            <button
+                                onClick={resetForm}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-2">Title</label>
@@ -249,14 +276,14 @@ export default function AdminProjectsPage() {
                             {/* Languages Selection (Global) */}
                             <div>
                                 <label className="block text-sm font-medium mb-2">Languages</label>
-                                <div className="space-y-2 border border-border rounded-lg p-4">
+                                <div className="space-y-2 border border-border rounded-lg p-4 bg-background/50">
                                     <div className="flex flex-wrap gap-2">
                                         {skills.filter((s: any) => s.type === "LANGUAGE").map((skill) => (
                                             <label
                                                 key={skill.id}
                                                 className={`cursor-pointer px-3 py-1.5 rounded-full border text-sm transition-colors flex items-center gap-2 ${form.skillIds.includes(skill.id)
-                                                    ? "bg-primary text-primary-foreground border-primary"
-                                                    : "bg-background hover:bg-background-secondary border-border"
+                                                    ? "bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/20"
+                                                    : "bg-white/5 text-foreground-muted hover:text-foreground border-white/10 hover:border-primary/50"
                                                     }`}
                                             >
                                                 <input
@@ -294,7 +321,7 @@ export default function AdminProjectsPage() {
                                     >
                                         <option value="">+ Add Category</option>
                                         {categories.map((cat) => (
-                                            <option key={cat.id} value={cat.id} disabled={form.categoryIds.includes(cat.id)}>
+                                            <option key={cat.id} value={cat.id} disabled={form.categoryIds.includes(cat.id)} className="bg-neutral-900 text-white">
                                                 {cat.name}
                                             </option>
                                         ))}
@@ -360,7 +387,7 @@ export default function AdminProjectsPage() {
                                                                 key={skill.id}
                                                                 className={`cursor-pointer px-3 py-1.5 rounded-full border text-sm transition-colors flex items-center gap-2 ${form.skillIds.includes(skill.id)
                                                                     ? "bg-primary text-primary-foreground border-primary"
-                                                                    : "bg-background hover:bg-background-secondary border-border"
+                                                                    : "bg-white/5 hover:bg-white/10 border-white/10"
                                                                     }`}
                                                             >
                                                                 <input
@@ -392,25 +419,35 @@ export default function AdminProjectsPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.isFeatured}
-                                        onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
-                                        className="rounded"
-                                    />
-                                    <span className="text-sm">Featured Project</span>
+                            <div className="flex items-center gap-6 p-4 bg-background/50 rounded-lg border border-border">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.isFeatured}
+                                            onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </div>
+                                    <span className="text-sm font-medium">Featured Project</span>
                                 </label>
 
-                                <div>
-                                    <label className="text-sm font-medium mr-2">Display Order:</label>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium mb-1">
+                                        Display Order
+                                        <span className="text-xs text-foreground-muted ml-2 font-normal">(1 = First, 2 = Second...)</span>
+                                    </label>
                                     <input
                                         type="number"
                                         value={form.displayOrder}
                                         onChange={(e) => setForm({ ...form, displayOrder: parseInt(e.target.value) || 0 })}
-                                        className="input w-20"
+                                        className="input w-24"
+                                        placeholder="0"
                                     />
+                                    <p className="text-xs text-foreground-muted mt-1">
+                                        Order swaps automatically if ID exists.
+                                    </p>
                                 </div>
                             </div>
 
@@ -428,44 +465,102 @@ export default function AdminProjectsPage() {
             )}
 
             {/* Projects List */}
-            <div className="space-y-4">
+            <div className="bg-card/30 border border-white/5 rounded-2xl overflow-hidden">
                 {projects.length === 0 ? (
-                    <div className="card text-center py-12">
-                        <p className="text-foreground-muted">No projects yet. Create your first project!</p>
-                    </div>
+                    <div className="p-12 text-center text-foreground-muted">No projects yet. Create your first project!</div>
                 ) : (
-                    projects.map((project) => (
-                        <div key={project.id} className="card flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="font-semibold">{project.title}</h3>
-                                    {project.isFeatured && <span className="badge">Featured</span>}
-                                </div>
-                                <p className="text-sm text-foreground-muted mb-2">{project.shortDescription}</p>
-                                <div className="flex flex-wrap gap-1">
-                                    {project.skills.slice(0, 5).map((skill) => (
-                                        <span key={skill.id} className="text-xs bg-background-secondary px-2 py-1 rounded">
-                                            {skill.name}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Link href={`/projects/${project.slug}`} target="_blank" className="btn-ghost text-sm">
-                                    View
-                                </Link>
-                                <button onClick={() => handleEdit(project)} className="btn-ghost text-sm">
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(project.id)}
-                                    className="btn-ghost text-sm text-red-400 hover:text-red-300"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                    <div className="divide-y divide-white/5">
+                        {/* Header */}
+                        <div className="grid grid-cols-[1fr_100px_80px_120px] gap-4 items-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">
+                            <span>Project</span>
+                            <span className="text-center">Featured</span>
+                            <span className="text-center">Order</span>
+                            <span className="text-right">Actions</span>
                         </div>
-                    ))
+
+                        {projects.map((project) => (
+                            <div
+                                key={project.id}
+                                className="grid grid-cols-[1fr_100px_80px_120px] gap-4 items-center px-5 py-3 hover:bg-white/[0.02] transition-colors"
+                            >
+                                {/* Project Info */}
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className="w-10 h-10 rounded-lg bg-neutral-900 border border-white/10 flex-shrink-0 overflow-hidden">
+                                        {project.thumbnailUrl ? (
+                                            <img src={project.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-lg">📁</div>
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="font-medium text-foreground truncate">{project.title}</h3>
+                                        <p className="text-xs text-foreground-muted truncate">
+                                            {project.categories.map(c => c.name).join(", ") || "No categories"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Featured Toggle */}
+                                <div className="flex justify-center">
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={project.isFeatured}
+                                            onChange={(e) => handleInlineUpdate(project.id, "isFeatured", e.target.checked)}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+
+                                {/* Display Order */}
+                                <div className="flex justify-center">
+                                    <input
+                                        type="number"
+                                        defaultValue={project.displayOrder}
+                                        onBlur={(e) => {
+                                            const newVal = parseInt(e.target.value) || 0;
+                                            if (newVal !== project.displayOrder) {
+                                                handleInlineUpdate(project.id, "displayOrder", newVal);
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                (e.target as HTMLInputElement).blur();
+                                            }
+                                        }}
+                                        className="w-14 text-center bg-neutral-900 border border-white/10 rounded-lg py-1 text-sm text-foreground focus:border-primary/50 focus:outline-none transition-colors"
+                                    />
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex items-center justify-end gap-1">
+                                    <Link
+                                        href={`/projects/${project.slug}`}
+                                        target="_blank"
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
+                                        title="View"
+                                    >
+                                        👁️
+                                    </Link>
+                                    <button
+                                        onClick={() => handleEdit(project)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
+                                        title="Edit"
+                                    >
+                                        ✏️
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(project.id)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-foreground-muted hover:text-red-400 transition-all"
+                                        title="Delete"
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

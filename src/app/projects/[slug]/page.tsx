@@ -44,7 +44,7 @@ export default async function ProjectDetailPage({
                         <img
                             src={project.thumbnailUrl}
                             alt=""
-                            className="w-full h-full object-cover opacity-[0.06] blur-sm"
+                            className="w-full h-full object-cover opacity-[0.06]"
                         />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
@@ -131,11 +131,11 @@ export default async function ProjectDetailPage({
                 <div className="container-custom max-w-4xl">
                     {/* Thumbnail */}
                     {project.thumbnailUrl && (
-                        <div className="aspect-video relative rounded-2xl overflow-hidden mb-10 border border-white/[0.06] glow animate-in delay-400">
+                        <div className="relative rounded-2xl overflow-hidden mb-10 border border-white/[0.06] glow animate-in delay-400">
                             <img
                                 src={project.thumbnailUrl}
                                 alt={project.title}
-                                className="object-cover w-full h-full"
+                                className="w-full h-auto"
                             />
                         </div>
                     )}

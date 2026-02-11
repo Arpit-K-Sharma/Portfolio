@@ -165,7 +165,7 @@ export default async function HomePage() {
                                     className={`glass-card group block animate-in delay-${(i + 1) * 100}`}
                                 >
                                     {/* Thumbnail */}
-                                    <div className="h-44 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-5 overflow-hidden relative">
+                                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-5 overflow-hidden relative">
                                         {project.thumbnailUrl ? (
                                             <img
                                                 src={project.thumbnailUrl}

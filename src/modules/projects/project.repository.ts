@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { projects, projectSkills, projectCategories, skills, categories } from "@/db/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and, sql } from "drizzle-orm";
 import type { ProjectInsert, ProjectUpdate, ProjectWithRelations } from "./project.types";
 import slugify from "slugify";
 
@@ -83,71 +83,129 @@ export const projectRepository = {
      * Create a new project
      */
     async create(data: ProjectInsert) {
-        const { skillIds, categoryIds, ...projectData } = data;
-        const slug = slugify(projectData.title, { lower: true, strict: true });
+        return await db.transaction(async (tx) => {
+            const { skillIds, categoryIds, ...projectData } = data;
 
-        const result = await db
-            .insert(projects)
-            .values({ ...projectData, slug })
-            .returning();
+            // Handle Featured Logic Limit
+            if (projectData.isFeatured) {
+                const featuredCount = await tx
+                    .select({ count: sql<number>`count(*)` })
+                    .from(projects)
+                    .where(eq(projects.isFeatured, true));
 
-        const project = result[0];
+                if (Number(featuredCount[0].count) >= 6) {
+                    throw new Error("Cannot add more than 6 featured projects. Please unfeature a project first.");
+                }
+            }
 
-        // Add skill relations
-        if (skillIds && skillIds.length > 0) {
-            await db.insert(projectSkills).values(
-                skillIds.map(skillId => ({ projectId: project.id, skillId }))
-            );
-        }
+            const slug = slugify(projectData.title, { lower: true, strict: true });
 
-        // Add category relations
-        if (categoryIds && categoryIds.length > 0) {
-            await db.insert(projectCategories).values(
-                categoryIds.map(categoryId => ({ projectId: project.id, categoryId }))
-            );
-        }
+            const result = await tx
+                .insert(projects)
+                .values({ ...projectData, slug })
+                .returning();
 
-        return this.getById(project.id);
+            const project = result[0];
+
+            // Add skill relations
+            if (skillIds && skillIds.length > 0) {
+                await tx.insert(projectSkills).values(
+                    skillIds.map(skillId => ({ projectId: project.id, skillId }))
+                );
+            }
+
+            // Add category relations
+            if (categoryIds && categoryIds.length > 0) {
+                await tx.insert(projectCategories).values(
+                    categoryIds.map(categoryId => ({ projectId: project.id, categoryId }))
+                );
+            }
+
+            return this.getById(project.id);
+        });
     },
 
     /**
      * Update a project
      */
     async update(id: string, data: ProjectUpdate) {
-        const { skillIds, categoryIds, ...projectData } = data;
+        return await db.transaction(async (tx) => {
+            const { skillIds, categoryIds, ...projectData } = data;
 
-        const updateData: typeof projectData & { slug?: string; updatedAt: Date } = {
-            ...projectData,
-            updatedAt: new Date(),
-        };
+            // Get current state
+            const currentProject = await tx.select().from(projects).where(eq(projects.id, id)).then(res => res[0]);
+            if (!currentProject) throw new Error("Project not found");
 
-        if (projectData.title) {
-            updateData.slug = slugify(projectData.title, { lower: true, strict: true });
-        }
+            const updateData: typeof projectData & { slug?: string; updatedAt: Date } = {
+                ...projectData,
+                updatedAt: new Date(),
+            };
 
-        await db.update(projects).set(updateData).where(eq(projects.id, id));
+            // Limit Check if becoming featured
+            if (projectData.isFeatured === true && !currentProject.isFeatured) {
+                const featuredCount = await tx
+                    .select({ count: sql<number>`count(*)` })
+                    .from(projects)
+                    .where(eq(projects.isFeatured, true));
 
-        // Update skill relations if provided
-        if (skillIds !== undefined) {
-            await db.delete(projectSkills).where(eq(projectSkills.projectId, id));
-            if (skillIds.length > 0) {
-                await db.insert(projectSkills).values(
-                    skillIds.map(skillId => ({ projectId: id, skillId }))
-                );
+                if (Number(featuredCount[0].count) >= 6) {
+                    throw new Error("Cannot add more than 6 featured projects. Please unfeature a project first.");
+                }
             }
-        }
 
-        // Update category relations if provided
-        if (categoryIds !== undefined) {
-            await db.delete(projectCategories).where(eq(projectCategories.projectId, id));
-            if (categoryIds.length > 0) {
-                await db.insert(projectCategories).values(
-                    categoryIds.map(categoryId => ({ projectId: id, categoryId }))
-                );
+            // Swap Logic
+            if (
+                projectData.displayOrder !== undefined &&
+                projectData.displayOrder !== currentProject.displayOrder
+            ) {
+                const existing = await tx
+                    .select()
+                    .from(projects)
+                    .where(eq(projects.displayOrder, projectData.displayOrder));
+
+                if (existing.length > 0) {
+                    const otherProject = existing[0];
+                    if (otherProject.id !== id) {
+                        // Swap: Set other project to MY old order
+                        await tx
+                            .update(projects)
+                            .set({
+                                displayOrder: currentProject.displayOrder, // Take my old spot
+                                updatedAt: new Date()
+                            })
+                            .where(eq(projects.id, otherProject.id));
+                    }
+                }
             }
-        }
 
-        return this.getById(id);
+            if (projectData.title) {
+                updateData.slug = slugify(projectData.title, { lower: true, strict: true });
+            }
+
+            await tx.update(projects).set(updateData).where(eq(projects.id, id));
+
+            // Update skill relations if provided
+            if (skillIds !== undefined) {
+                await tx.delete(projectSkills).where(eq(projectSkills.projectId, id));
+                if (skillIds.length > 0) {
+                    await tx.insert(projectSkills).values(
+                        skillIds.map(skillId => ({ projectId: id, skillId }))
+                    );
+                }
+            }
+
+            // Update category relations if provided
+            if (categoryIds !== undefined) {
+                await tx.delete(projectCategories).where(eq(projectCategories.projectId, id));
+                if (categoryIds.length > 0) {
+                    await tx.insert(projectCategories).values(
+                        categoryIds.map(categoryId => ({ projectId: id, categoryId }))
+                    );
+                }
+            }
+
+            return this.getById(id);
+        });
     },
 
     /**

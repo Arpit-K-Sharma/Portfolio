@@ -112,8 +112,8 @@ export default function AdminSkillsPage() {
                         onChange={(e) => setForm({ ...form, type: e.target.value as any })}
                         className="input"
                     >
-                        <option value="TECHNOLOGY">Technology</option>
-                        <option value="LANGUAGE">Language</option>
+                        <option value="TECHNOLOGY" className="bg-neutral-900 text-white">Technology</option>
+                        <option value="LANGUAGE" className="bg-neutral-900 text-white">Language</option>
                     </select>
                     {form.type === "TECHNOLOGY" && (
                         <select
@@ -121,9 +121,9 @@ export default function AdminSkillsPage() {
                             onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                             className="input"
                         >
-                            <option value="">Select Category</option>
+                            <option value="" className="bg-neutral-900 text-white">Select Category</option>
                             {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
+                                <option key={cat.id} value={cat.id} className="bg-neutral-900 text-white">
                                     {cat.name}
                                 </option>
                             ))}

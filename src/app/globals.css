@@ -19,6 +19,11 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Fix for select options in dark mode */
+  select option {
+    @apply bg-neutral-900 text-white;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;

@@ -1,6 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
+    const pathname = usePathname();
+    const isAdmin = pathname?.startsWith("/shadow");
+
+    if (isAdmin) return null;
+
     return (
         <footer className="relative border-t border-white/[0.06] mt-auto">
             {/* Gradient line accent */}
