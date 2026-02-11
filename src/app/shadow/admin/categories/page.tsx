@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/toast-context";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Category {
     id: string;
@@ -15,6 +17,8 @@ export default function AdminCategoriesPage() {
     const [form, setForm] = useState({ name: "", description: "", isVisible: true });
     const [editing, setEditing] = useState<Category | null>(null);
     const [saving, setSaving] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const fetchCategories = async () => {
         const res = await fetch("/api/shadow/admin/categories");
@@ -42,9 +46,12 @@ export default function AdminCategoriesPage() {
             });
 
             await fetchCategories();
-            await fetchCategories();
             setForm({ name: "", description: "", isVisible: true });
             setEditing(null);
+            showToast(editing ? "Category updated" : "Category created", "success");
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to save category", "error");
         } finally {
             setSaving(false);
         }
@@ -60,9 +67,16 @@ export default function AdminCategoriesPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this category?")) return;
-        await fetch(`/api/shadow/admin/categories/${id}`, { method: "DELETE" });
-        await fetchCategories();
+        try {
+            await fetch(`/api/shadow/admin/categories/${id}`, { method: "DELETE" });
+            await fetchCategories();
+            showToast("Category deleted", "success");
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to delete category", "error");
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
     return (
@@ -141,7 +155,7 @@ export default function AdminCategoriesPage() {
                                 <button onClick={() => handleEdit(category)} className="text-sm text-primary hover:underline">
                                     Edit
                                 </button>
-                                <button onClick={() => handleDelete(category.id)} className="text-sm text-red-400 hover:underline">
+                                <button onClick={() => setDeleteTarget(category.id)} className="text-sm text-red-400 hover:underline">
                                     Delete
                                 </button>
                             </div>
@@ -156,6 +170,17 @@ export default function AdminCategoriesPage() {
             {categories.length === 0 && (
                 <p className="text-center text-foreground-muted py-12">No categories yet. Add your first category!</p>
             )}
+
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Delete Category"
+                message="Are you sure? Projects using this category will lose the association."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 }

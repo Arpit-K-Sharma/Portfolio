@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { SkillIcon } from "@/components/skill-icon";
+import { useToast } from "@/components/ui/toast-context";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Skill {
     id: string;
@@ -23,6 +25,8 @@ export default function AdminSkillsPage() {
     const [form, setForm] = useState({ name: "", iconUrl: "", categoryId: "", type: "TECHNOLOGY" });
     const [editing, setEditing] = useState<Skill | null>(null);
     const [saving, setSaving] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const fetchData = async () => {
         const [skillsRes, categoriesRes] = await Promise.all([
@@ -63,6 +67,10 @@ export default function AdminSkillsPage() {
             await fetchData();
             setForm({ name: "", iconUrl: "", categoryId: "", type: "TECHNOLOGY" });
             setEditing(null);
+            showToast(editing ? "Skill updated" : "Skill created", "success");
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to save skill", "error");
         } finally {
             setSaving(false);
         }
@@ -79,9 +87,16 @@ export default function AdminSkillsPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this skill?")) return;
-        await fetch(`/api/shadow/admin/skills/${id}`, { method: "DELETE" });
-        await fetchData();
+        try {
+            await fetch(`/api/shadow/admin/skills/${id}`, { method: "DELETE" });
+            await fetchData();
+            showToast("Skill deleted", "success");
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to delete skill", "error");
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
     const getCategoryName = (id: string | null) => {
@@ -182,7 +197,7 @@ export default function AdminSkillsPage() {
                             <button onClick={() => handleEdit(skill)} className="text-sm text-primary hover:underline">
                                 Edit
                             </button>
-                            <button onClick={() => handleDelete(skill.id)} className="text-sm text-red-400 hover:underline">
+                            <button onClick={() => setDeleteTarget(skill.id)} className="text-sm text-red-400 hover:underline">
                                 Delete
                             </button>
                         </div>
@@ -193,6 +208,17 @@ export default function AdminSkillsPage() {
             {skills.length === 0 && (
                 <p className="text-center text-foreground-muted py-12">No skills yet. Add your first skill!</p>
             )}
+
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Delete Skill"
+                message="Are you sure you want to delete this skill? Projects using it will lose this association."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 }

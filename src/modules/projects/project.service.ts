@@ -2,8 +2,8 @@ import { projectRepository } from "./project.repository";
 import type { ProjectInsert, ProjectUpdate } from "./project.types";
 
 export const projectService = {
-    async getAllProjects() {
-        return projectRepository.getAll();
+    async getAllProjects(filters?: { search?: string; categorySlug?: string; skillSlugs?: string[] }) {
+        return projectRepository.getAll(filters);
     },
 
     async getFeaturedProjects() {

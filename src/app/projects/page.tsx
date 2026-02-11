@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { projectService } from "@/modules/projects";
 import { categoryService } from "@/modules/categories";
+import { skillService } from "@/modules/skills";
 import { SkillIcon } from "@/components/skill-icon";
+import { ProjectSearchFilters } from "@/components/project-search-filters";
 
 export const metadata = {
     title: "Projects | Arpit Sharma",
@@ -11,16 +13,19 @@ export const metadata = {
 export default async function ProjectsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ category?: string }>;
+    searchParams: Promise<{ category?: string; search?: string; skill?: string }>;
 }) {
     const params = await searchParams;
-    const categorySlug = params.category;
 
-    const [projects, categories] = await Promise.all([
-        categorySlug
-            ? projectService.getProjectsByCategory(categorySlug)
-            : projectService.getAllProjects(),
+    // Fetch Data
+    const [projects, categories, skills] = await Promise.all([
+        projectService.getAllProjects({
+            search: params.search,
+            categorySlug: params.category,
+            skillSlugs: params.skill ? [params.skill] : undefined,
+        }),
         categoryService.getAllVisibleCategories(),
+        skillService.getAllSkills(),
     ]);
 
     return (
@@ -45,29 +50,7 @@ export default async function ProjectsPage({
             {/* Filters */}
             <section className="pb-8">
                 <div className="container-custom">
-                    <div className="flex flex-wrap gap-2 justify-center animate-in delay-200">
-                        <Link
-                            href="/projects"
-                            className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-300 border ${!categorySlug
-                                ? "bg-primary text-white border-primary glow-sm"
-                                : "bg-white/[0.04] border-white/[0.08] text-foreground-muted hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-foreground"
-                                }`}
-                        >
-                            All
-                        </Link>
-                        {categories.map((cat) => (
-                            <Link
-                                key={cat.id}
-                                href={`/projects?category=${cat.slug}`}
-                                className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-300 border ${categorySlug === cat.slug
-                                    ? "bg-primary text-white border-primary glow-sm"
-                                    : "bg-white/[0.04] border-white/[0.08] text-foreground-muted hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-foreground"
-                                    }`}
-                            >
-                                {cat.name}
-                            </Link>
-                        ))}
-                    </div>
+                    <ProjectSearchFilters categories={categories} skills={skills} />
                 </div>
             </section>
 

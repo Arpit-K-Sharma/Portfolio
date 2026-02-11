@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/ui/toast-context";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Skill {
     id: string;
@@ -53,6 +55,7 @@ export default function AdminProjectsPage() {
         categoryIds: [] as string[],
     });
     const [saving, setSaving] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
     const fetchData = async () => {
         const [projectsRes, skillsRes, categoriesRes] = await Promise.all([
@@ -107,6 +110,10 @@ export default function AdminProjectsPage() {
         setShowForm(true);
     };
 
+    const { showToast } = useToast();
+
+    // ... (fetchData) ...
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
@@ -125,19 +132,26 @@ export default function AdminProjectsPage() {
 
             await fetchData();
             resetForm();
+            showToast(editing ? "Project updated successfully" : "Project created successfully", "success");
         } catch (error) {
             console.error("Error saving project:", error);
-            alert("Failed to save project. " + (error as Error).message);
+            showToast("Failed to save project", "error");
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this project?")) return;
-
-        await fetch(`/api/shadow/admin/projects/${id}`, { method: "DELETE" });
-        await fetchData();
+        try {
+            await fetch(`/api/shadow/admin/projects/${id}`, { method: "DELETE" });
+            await fetchData();
+            showToast("Project deleted successfully", "success");
+        } catch (error) {
+            console.error("Error deleting project:", error);
+            showToast("Failed to delete project", "error");
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
     // Inline update for featured toggle and display order
@@ -149,9 +163,10 @@ export default function AdminProjectsPage() {
                 body: JSON.stringify({ [field]: value }),
             });
             await fetchData();
+            showToast("Updated successfully", "success");
         } catch (error) {
             console.error("Error updating project:", error);
-            alert(`Failed to update ${field}. ${(error as Error).message}`);
+            showToast(`Failed to update ${field}`, "error");
         }
     };
 
@@ -489,7 +504,9 @@ export default function AdminProjectsPage() {
                                         {project.thumbnailUrl ? (
                                             <img src={project.thumbnailUrl} alt="" className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-lg">📁</div>
+                                            <div className="w-full h-full flex items-center justify-center text-foreground-muted">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17V7a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" /></svg>
+                                            </div>
                                         )}
                                     </div>
                                     <div className="min-w-0">
@@ -541,21 +558,21 @@ export default function AdminProjectsPage() {
                                         className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
                                         title="View"
                                     >
-                                        👁️
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
                                     </Link>
                                     <button
                                         onClick={() => handleEdit(project)}
                                         className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
                                         title="Edit"
                                     >
-                                        ✏️
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(project.id)}
+                                        onClick={() => setDeleteTarget(project.id)}
                                         className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-foreground-muted hover:text-red-400 transition-all"
                                         title="Delete"
                                     >
-                                        🗑️
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -563,6 +580,18 @@ export default function AdminProjectsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Delete Project"
+                message="Are you sure you want to delete this project? This action cannot be undone."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 }

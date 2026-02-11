@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/toast-context";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Message {
     id: string;
@@ -14,6 +16,8 @@ interface Message {
 export default function AdminMessagesPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const fetchMessages = async () => {
         const res = await fetch("/api/shadow/admin/messages");
@@ -32,9 +36,16 @@ export default function AdminMessagesPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this message?")) return;
-        await fetch(`/api/shadow/admin/messages/${id}`, { method: "DELETE" });
-        await fetchMessages();
+        try {
+            await fetch(`/api/shadow/admin/messages/${id}`, { method: "DELETE" });
+            await fetchMessages();
+            showToast("Message deleted", "success");
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to delete message", "error");
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
     return (
@@ -105,7 +116,7 @@ export default function AdminMessagesPage() {
                                     </button>
                                 )}
                                 <button
-                                    onClick={() => handleDelete(message.id)}
+                                    onClick={() => setDeleteTarget(message.id)}
                                     className="btn-ghost text-sm text-red-400 hover:text-red-300"
                                 >
                                     Delete
@@ -115,6 +126,18 @@ export default function AdminMessagesPage() {
                     ))}
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Delete Message"
+                message="Are you sure you want to delete this message? This cannot be undone."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 }

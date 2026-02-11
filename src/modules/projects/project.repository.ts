@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { projects, projectSkills, projectCategories, skills, categories } from "@/db/schema";
-import { eq, desc, inArray, and, sql } from "drizzle-orm";
+import { eq, desc, inArray, and, or, ilike, exists, sql } from "drizzle-orm";
 import type { ProjectInsert, ProjectUpdate, ProjectWithRelations } from "./project.types";
 import slugify from "slugify";
 
@@ -8,11 +8,67 @@ export const projectRepository = {
     /**
      * Get all projects with their relations
      */
-    async getAll(): Promise<ProjectWithRelations[]> {
-        const allProjects = await db
+    /**
+     * Get all projects with optional filters
+     */
+    async getAll(filters: {
+        search?: string;
+        categorySlug?: string;
+        skillSlugs?: string[];
+    } = {}): Promise<ProjectWithRelations[]> {
+        const conditions = [];
+
+        // Search (Title or Short Description)
+        if (filters.search) {
+            const searchLower = `%${filters.search.toLowerCase()}%`;
+            conditions.push(
+                or(
+                    ilike(projects.title, searchLower),
+                    ilike(projects.shortDescription, searchLower)
+                )
+            );
+        }
+
+        // Category Filter
+        if (filters.categorySlug) {
+            conditions.push(
+                exists(
+                    db.select()
+                        .from(projectCategories)
+                        .innerJoin(categories, eq(projectCategories.categoryId, categories.id))
+                        .where(and(
+                            eq(projectCategories.projectId, projects.id),
+                            eq(categories.slug, filters.categorySlug)
+                        ))
+                )
+            );
+        }
+
+        // Skill Filters (Handle multiple skills - e.g. "React" AND "TypeScript")
+        if (filters.skillSlugs && filters.skillSlugs.length > 0) {
+            for (const slug of filters.skillSlugs) {
+                if (!slug) continue;
+                conditions.push(
+                    exists(
+                        db.select()
+                            .from(projectSkills)
+                            .innerJoin(skills, eq(projectSkills.skillId, skills.id))
+                            .where(and(
+                                eq(projectSkills.projectId, projects.id),
+                                eq(skills.slug, slug)
+                            ))
+                    )
+                );
+            }
+        }
+
+        const query = db
             .select()
             .from(projects)
-            .orderBy(desc(projects.isFeatured), projects.displayOrder);
+            .where(and(...conditions))
+            .orderBy(desc(projects.isFeatured), projects.displayOrder, desc(projects.createdAt));
+
+        const allProjects = await query;
 
         return this.attachRelations(allProjects);
     },
@@ -26,7 +82,7 @@ export const projectRepository = {
             .from(projects)
             .where(eq(projects.isFeatured, true))
             .orderBy(projects.displayOrder)
-            .limit(3);
+            .limit(6);
 
         return this.attachRelations(featuredProjects);
     },

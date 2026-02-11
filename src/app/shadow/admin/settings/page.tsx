@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useToast } from "@/components/ui/toast-context";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function AdminSettingsPage() {
     const [exporting, setExporting] = useState(false);
     const [importing, setImporting] = useState(false);
     const [message, setMessage] = useState("");
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [showImportConfirm, setShowImportConfirm] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { showToast } = useToast();
 
     const handleExport = async () => {
         setExporting(true);
@@ -31,20 +36,22 @@ export default function AdminSettingsPage() {
         }
     };
 
-    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setPendingFile(file);
+        setShowImportConfirm(true);
+        e.target.value = "";
+    };
 
-        if (!confirm("This will replace ALL existing data. Are you sure?")) {
-            e.target.value = "";
-            return;
-        }
-
+    const handleImport = async () => {
+        if (!pendingFile) return;
+        setShowImportConfirm(false);
         setImporting(true);
         setMessage("");
 
         try {
-            const text = await file.text();
+            const text = await pendingFile.text();
             const data = JSON.parse(text);
 
             const response = await fetch("/api/shadow/admin/backup", {
@@ -59,12 +66,15 @@ export default function AdminSettingsPage() {
                 throw new Error(result.error || "Failed to import");
             }
 
+            showToast(result.message || "Data restored successfully!", "success");
             setMessage(result.message || "Data restored successfully!");
         } catch (err) {
-            setMessage(err instanceof Error ? err.message : "Failed to import backup");
+            const errMsg = err instanceof Error ? err.message : "Failed to import backup";
+            showToast(errMsg, "error");
+            setMessage(errMsg);
         } finally {
             setImporting(false);
-            e.target.value = "";
+            setPendingFile(null);
         }
     };
 
@@ -98,7 +108,7 @@ export default function AdminSettingsPage() {
                 <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={handleImport}
+                    onChange={handleFileSelect}
                     accept=".json"
                     className="hidden"
                 />
@@ -115,8 +125,8 @@ export default function AdminSettingsPage() {
             {message && (
                 <div
                     className={`p-4 rounded-lg ${message.includes("success") || message.includes("Successfully")
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-red-500/10 text-red-400"
+                        ? "bg-green-500/10 text-green-400"
+                        : "bg-red-500/10 text-red-400"
                         }`}
                 >
                     {message}
@@ -125,12 +135,26 @@ export default function AdminSettingsPage() {
 
             {/* Monthly Reminder */}
             <div className="card bg-primary/10 border-primary/20">
-                <h3 className="font-semibold mb-2">📅 Monthly Backup Reminder</h3>
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                    Monthly Backup Reminder
+                </h3>
                 <p className="text-foreground-muted text-sm">
                     Set a monthly reminder to export your backup. It takes 30 seconds and gives you peace of mind.
                     Store backups in Google Drive or a private GitHub repository.
                 </p>
             </div>
+
+            <ConfirmDialog
+                open={showImportConfirm}
+                title="Replace All Data"
+                message="This will replace ALL existing data with the contents of the backup file. This action cannot be undone. Are you absolutely sure?"
+                confirmLabel="Replace All Data"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={handleImport}
+                onCancel={() => { setShowImportConfirm(false); setPendingFile(null); }}
+            />
         </div>
     );
 }
