@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { backupService } from "@/modules/backup";
 import { requireAdminApi } from "@/lib/admin-middleware";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
     const error = await requireAdminApi();
@@ -33,6 +34,10 @@ export async function POST(request: Request) {
         if (!result.success) {
             return NextResponse.json({ error: result.message }, { status: 400 });
         }
+
+        // Revalidate all pages
+        revalidatePath("/", "layout");
+        revalidatePath("/projects");
 
         return NextResponse.json(result);
     } catch (err) {
