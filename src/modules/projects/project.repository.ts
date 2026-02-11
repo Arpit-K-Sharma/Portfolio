@@ -129,7 +129,7 @@ export const projectRepository = {
         const projectResults = await db
             .select()
             .from(projects)
-            .where(inArray(projects.id, projectIds.map(p => p.projectId)))
+            .where(inArray(projects.id, projectIds.map((p: { projectId: string }) => p.projectId)))
             .orderBy(projects.displayOrder);
 
         return this.attachRelations(projectResults);
