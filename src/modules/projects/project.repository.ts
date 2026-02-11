@@ -139,7 +139,7 @@ export const projectRepository = {
      * Create a new project
      */
     async create(data: ProjectInsert) {
-        return await db.transaction(async (tx) => {
+        return await db.transaction(async (tx: any) => {
             const { skillIds, categoryIds, ...projectData } = data;
 
             // Handle Featured Logic Limit
@@ -185,11 +185,11 @@ export const projectRepository = {
      * Update a project
      */
     async update(id: string, data: ProjectUpdate) {
-        return await db.transaction(async (tx) => {
+        return await db.transaction(async (tx: any) => {
             const { skillIds, categoryIds, ...projectData } = data;
 
             // Get current state
-            const currentProject = await tx.select().from(projects).where(eq(projects.id, id)).then(res => res[0]);
+            const currentProject = await tx.select().from(projects).where(eq(projects.id, id)).then((res: any[]) => res[0]);
             if (!currentProject) throw new Error("Project not found");
 
             const updateData: typeof projectData & { slug?: string; updatedAt: Date } = {
@@ -304,14 +304,14 @@ export const projectRepository = {
         return projectList.map(project => ({
             ...project,
             skills: skillRelations
-                .filter(r => r.projectId === project.id)
-                .map(r => ({
+                .filter((r: any) => r.projectId === project.id)
+                .map((r: any) => ({
                     ...r.skill,
                     type: r.skill.type as "LANGUAGE" | "TECHNOLOGY",
                 })),
             categories: categoryRelations
-                .filter(r => r.projectId === project.id)
-                .map(r => r.category),
+                .filter((r: any) => r.projectId === project.id)
+                .map((r: any) => r.category),
         }));
     },
 };
