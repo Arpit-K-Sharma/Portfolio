@@ -1,16 +1,23 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Metadata } from "next";
 import { projectService } from "@/modules/projects";
 import { categoryService } from "@/modules/categories";
 import { skillService } from "@/modules/skills";
 import { settingsService } from "@/modules/settings";
+import { profileService } from "@/modules/profile";
 import { SkillIcon } from "@/components/skill-icon";
 import { ProjectSearchFilters } from "@/components/project-search-filters";
 
-export const metadata = {
-    title: "Projects | Arpit Sharma",
-    description: "Explore my portfolio of blockchain and full-stack development projects.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const profile = await profileService.getProfile();
+    const name = profile?.name || "Portfolio";
+
+    return {
+        title: `Projects | ${name}`,
+        description: "Explore my portfolio of blockchain and full-stack development projects.",
+    };
+}
 
 export default async function ProjectsPage({
     searchParams,

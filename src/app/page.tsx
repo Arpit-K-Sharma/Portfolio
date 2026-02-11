@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { profileService } from "@/modules/profile";
 import { projectService } from "@/modules/projects";
 import { skillService } from "@/modules/skills";
@@ -7,10 +8,15 @@ import { SkillIcon } from "@/components/skill-icon";
 import { Category } from "@/modules/categories/category.types";
 import { Skill } from "@/modules/skills/skill.types";
 
-export const metadata = {
-    title: "Arpit Sharma | Portfolio",
-    description: "Full-stack developer portfolio showcasing projects and skills.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const profile = await profileService.getProfile();
+    const name = profile?.name || "Portfolio";
+
+    return {
+        title: name,
+        description: profile?.bio || "Full-stack developer portfolio showcasing projects and skills.",
+    };
+}
 
 export default async function HomePage() {
     const [profile, featuredProjects, skills, categories] = await Promise.all([
