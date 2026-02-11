@@ -16,7 +16,7 @@ export default async function HomePage() {
     const [profile, featuredProjects, skills, categories] = await Promise.all([
         profileService.getProfile(),
         projectService.getFeaturedProjects(),
-        skillService.getAllSkills(),
+        skillService.getAllSkills() as Promise<Skill[]>,
         categoryService.getAllCategories(),
     ]);
 
