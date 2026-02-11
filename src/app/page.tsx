@@ -4,6 +4,8 @@ import { projectService } from "@/modules/projects";
 import { skillService } from "@/modules/skills";
 import { categoryService } from "@/modules/categories";
 import { SkillIcon } from "@/components/skill-icon";
+import { Category } from "@/modules/categories/category.types";
+import { Skill } from "@/modules/skills/skill.types";
 
 export const metadata = {
     title: "Arpit Sharma | Portfolio",
@@ -19,15 +21,16 @@ export default async function HomePage() {
     ]);
 
     // Group skills by category
-    const skillsByCategory: Record<string, typeof skills> = {};
-    categories.forEach((cat) => {
-        const catSkills = skills.filter((s: any) => s.categoryId === cat.id);
+    // Group skills by category
+    const skillsByCategory: Record<string, Skill[]> = {};
+    categories.forEach((cat: Category) => {
+        const catSkills = skills.filter((s: Skill) => s.categoryId === cat.id);
         if (catSkills.length > 0) {
             skillsByCategory[cat.name] = catSkills;
         }
     });
 
-    const uncategorizedSkills = skills.filter((s: any) => !s.categoryId);
+    const uncategorizedSkills = skills.filter((s: Skill) => !s.categoryId);
     if (uncategorizedSkills.length > 0) {
         skillsByCategory["Other"] = uncategorizedSkills;
     }
