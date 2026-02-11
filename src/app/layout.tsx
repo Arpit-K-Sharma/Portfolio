@@ -9,7 +9,7 @@ import { profileService } from "@/modules/profile";
 export async function generateMetadata(): Promise<Metadata> {
     const profile = await profileService.getProfile();
     const name = profile?.name || "Portfolio";
-    const title = `${name} | Portfolio`;
+    const title = name;
 
     return {
         title,
