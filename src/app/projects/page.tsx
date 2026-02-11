@@ -62,7 +62,7 @@ export default async function ProjectsPage({
             {/* Filters */}
             {enableSearchFilters && (
                 <section className="pb-8">
-                    <div className="container-custom">
+                    <div className="container-custom max-w-[1400px]">
                         <Suspense fallback={<div className="h-20 animate-pulse bg-white/5 rounded-xl max-w-5xl mx-auto" />}>
                             <ProjectSearchFilters categories={categories} skills={skills} />
                         </Suspense>
@@ -72,7 +72,7 @@ export default async function ProjectsPage({
 
             {/* Projects Grid */}
             <section className="pb-20">
-                <div className="container-custom">
+                <div className="container-custom max-w-[1400px]">
                     {projects.length === 0 ? (
                         <div className="text-center py-20">
                             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
@@ -89,10 +89,10 @@ export default async function ProjectsPage({
                                 <Link
                                     key={project.id}
                                     href={`/projects/${project.slug}`}
-                                    className={`glass-card group block animate-in delay-${Math.min((i + 1) * 100, 700)} hover:border-primary/30 transition-all duration-300`}
+                                    className={`glass-card group flex flex-col h-full animate-in delay-${Math.min((i + 1) * 100, 700)} hover:border-primary/30 transition-all duration-300`}
                                 >
                                     {/* Thumbnail */}
-                                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-5 overflow-hidden relative">
+                                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-5 overflow-hidden relative shrink-0">
                                         {project.thumbnailUrl ? (
                                             <img
                                                 src={project.thumbnailUrl}
@@ -115,23 +115,30 @@ export default async function ProjectsPage({
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">
-                                        {project.title}
-                                    </h3>
-                                    <p className="text-foreground-muted text-sm mb-4 line-clamp-2 leading-relaxed">
-                                        {project.shortDescription}
-                                    </p>
+                                    <div className="flex-1 flex flex-col">
+                                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">
+                                            {project.title}
+                                        </h3>
+                                        <p className="text-foreground-muted text-sm mb-4 line-clamp-2 leading-relaxed">
+                                            {project.shortDescription}
+                                        </p>
 
-                                    {/* Categories */}
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {project.categories.map((cat) => (
-                                            <span key={cat.id} className="badge text-xs bg-primary/10 text-primary border-primary/20">{cat.name}</span>
-                                        ))}
+                                        {/* Categories */}
+                                        <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+                                            {project.categories.slice(0, 2).map((cat) => (
+                                                <span key={cat.id} className="badge text-xs bg-primary/10 text-primary border-primary/20">{cat.name}</span>
+                                            ))}
+                                            {project.categories.length > 2 && (
+                                                <span className="badge text-xs bg-primary/5 text-primary/70 border-primary/10 cursor-help" title={`${project.categories.length - 2} more categories`}>
+                                                    +{project.categories.length - 2}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Skills - Icon Only */}
-                                    <div className="flex items-center gap-1.5 pt-4 border-t border-white/[0.08]">
-                                        {project.skills.slice(0, 8).map((skill) => (
+                                    {/* Skills */}
+                                    <div className="flex flex-wrap gap-2 pt-4 border-t border-white/[0.08] mt-4">
+                                        {project.skills.slice(0, 5).map((skill) => (
                                             <div
                                                 key={skill.id}
                                                 title={skill.name}
@@ -140,12 +147,12 @@ export default async function ProjectsPage({
                                                 <SkillIcon icon={skill.iconUrl} alt={skill.name} className="w-4.5 h-4.5 opacity-90 group-hover/skill:opacity-100" />
                                             </div>
                                         ))}
-                                        {project.skills.length > 8 && (
+                                        {project.skills.length > 5 && (
                                             <div
-                                                title={`${project.skills.length - 8} more skills`}
+                                                title={`${project.skills.length - 5} more skills`}
                                                 className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[10px] font-semibold text-foreground-muted cursor-help"
                                             >
-                                                +{project.skills.length - 8}
+                                                +{project.skills.length - 5}
                                             </div>
                                         )}
                                     </div>
