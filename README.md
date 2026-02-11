@@ -1,21 +1,27 @@
 # Portfolio Website
 
-A modern, production-ready portfolio website built with Next.js 15, featuring a secure admin panel and robust backup system.
+A modern, production-ready portfolio website built with Next.js 15, featuring a secure admin panel, dynamic content management, and a robust backup system.
+
+![Portfolio Preview](public/og-image.jpg)
 
 ## Features
 
-- 🎨 **Dark Theme** - Premium dark mode with glassmorphism effects
-- 🔐 **Secure Admin Panel** - Google OAuth with sub ID verification
-- 📁 **Project Showcase** - Categories, skills, and filtering
-- 💬 **Contact Form** - Requires Google sign-in for reply capability
-- 💾 **Backup System** - JSON export/import for data safety
+- 🎨 **Modern UI/UX** - Premium dark mode with glassmorphism, animations, and responsive design.
+- 🔐 **Secure Admin Panel** - Google OAuth authentication with whitelist for admin access.
+- 📁 **Dynamic Content** - Manage projects, skills, categories, and profile details via the admin dashboard.
+- 💬 **Contact System** - Integrated message system with email reply capability.
+- 💾 **Backup System** - JSON export/import for data safety and migration.
+- 🚀 **SEO Optimized** - Semantic HTML, metadata management, and OpenGraph support.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS
-- **Database**: PostgreSQL with Drizzle ORM
-- **Auth**: NextAuth v5 with Google OAuth
-- **Hosting**: Vercel
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS, CSS Variables
+- **Database**: PostgreSQL (Prisma Postgres / Vercel Postgres)
+- **ORM**: Drizzle ORM
+- **Auth**: NextAuth.js v5 (Google OAuth)
+- **Deployment**: Vercel
 
 ---
 
@@ -24,8 +30,8 @@ A modern, production-ready portfolio website built with Next.js 15, featuring a 
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
-- Google Cloud Console access
+- A PostgreSQL database (Local or Cloud)
+- Google Cloud Console account (for OAuth)
 
 ### 1. Install Dependencies
 
@@ -33,148 +39,105 @@ A modern, production-ready portfolio website built with Next.js 15, featuring a 
 npm install
 ```
 
-### 2. Set Up PostgreSQL
+### 2. Environment Setup
 
-Create a database named `portfolio` in your local PostgreSQL instance.
-
-### 3. Get Google OAuth Credentials
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Navigate to **APIs & Services** → **Credentials**
-4. Click **Create Credentials** → **OAuth 2.0 Client IDs**
-5. Set Application type to **Web application**
-6. Add Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-7. Copy your **Client ID** and **Client Secret**
-
-### 4. Get Your Google Sub ID (Required for Admin Access)
-
-Your Google `sub` ID is a unique identifier that grants you admin access. Get it **before** starting the server:
-
-1. Go to [Google OAuth Playground](https://developers.google.com/oauthplayground/)
-2. In the left panel, find **Google OAuth2 API v2** and select:
-   - `https://www.googleapis.com/auth/userinfo.profile`
-3. Click **"Authorize APIs"** and sign in with your Google account
-4. Click **"Exchange authorization code for tokens"**
-5. Click **"List possible operations"** → **"userinfo.v2.me"** → **"Send the request"**
-6. In the response, find the `id` field:
-   ```json
-   {
-     "id": "123456789012345678901",  ← This is your sub ID
-     "name": "Your Name",
-     ...
-   }
-   ```
-7. Copy this ID for the next step
-
-### 5. Configure Environment Variables
-
-Create `.env.local` in the project root:
+Create a `.env.local` file in the root directory:
 
 ```env
-# Database
-DATABASE_URL=postgresql://username:password@localhost:5432/portfolio
+# Database Connection (PostgreSQL)
+DATABASE_URL="postgresql://user:password@localhost:5432/portfolio"
 
-# Auth (generate with: npx auth secret)
-AUTH_SECRET=your-generated-secret
+# NextAuth Secret (Generate with: npx auth secret)
+AUTH_SECRET="your-secure-random-string"
 
-# Google OAuth
-AUTH_GOOGLE_ID=your-google-client-id
-AUTH_GOOGLE_SECRET=your-google-client-secret
+# Google OAuth Credentials
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
 
-# Admin Access (your Google sub ID from step 4)
-ADMIN_GOOGLE_SUB=123456789012345678901
+# Admin Configuration
+ADMIN_GOOGLE_SUB="your-google-sub-id" # Found in Google OAuth Playground or after first login
 ```
 
-### 6. Run Database Migrations
+### 3. Database Setup
+
+Push the schema to your database:
 
 ```bash
 npm run db:push
 ```
 
-### 7. Start Development Server
+### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Visit:
-- **Public site**: http://localhost:3000
-- **Admin panel**: http://localhost:3000/shadow/admin (secret path!)
+Visit `http://localhost:3000`. The admin panel is at `/shadow/admin`.
 
 ---
 
-## Admin Panel
+## Deployment Guide (Vercel)
 
-Access the admin panel at `/shadow/admin` (only visible to the configured admin).
+This project is optimized for deployment on **Vercel**.
 
-| Page | Description |
-|------|-------------|
-| Dashboard | Overview stats and quick actions |
-| Profile | Edit your name, title, bio, social links |
-| Projects | Create, edit, delete projects |
-| Skills | Manage technical skills |
-| Categories | Manage project categories |
-| Messages | View and reply to contact messages |
-| Settings | Export/import backup JSON |
+### Step 1: Push to GitHub
+Ensure your code is pushed to a GitHub repository.
 
----
+### Step 2: Import to Vercel
+1. Log in to [Vercel](https://vercel.com).
+2. Click **Add New** -> **Project**.
+3. Import your repository.
+4. Keep the default build settings.
 
-## Backup System
+### Step 3: Configure Database (Prisma Postgres)
+1. Go to the Vercel Marketplace or Storage tab.
+2. Select **Prisma Postgres** (recommended) or **Vercel Postgres (Neon)**.
+3. Link the database to your project.
+4. Vercel will automatically add `POSTGRES_URL` and related variables to your environment.
 
-### Export Data
+### Step 4: Configure OAuth
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Create/Edit your OAuth 2.0 Client ID.
+3. Add your Vercel deployment URL to **Authorized redirect URIs**:
+   ```
+   https://your-project.vercel.app/api/auth/callback/google
+   ```
+   *(Also add your custom domain if you have one)*
 
-1. Go to **Admin** → **Settings**
-2. Click **"Export Portfolio JSON"**
-3. Store the file in Google Drive or a private GitHub repo
+### Step 5: Add Missing Environment Variables
+Go to **Settings** -> **Environment Variables** in Vercel and add:
 
-### Import Data
+- `AUTH_SECRET`: Generate a strong secret.
+- `AUTH_GOOGLE_ID`: Your Google Client ID.
+- `AUTH_GOOGLE_SECRET`: Your Google Client Secret.
+- `ADMIN_GOOGLE_SUB`: Your unique Google User ID (to grant yourself admin access).
 
-1. Go to **Admin** → **Settings**
-2. Click **"Import Portfolio JSON"**
-3. Select your backup file
+### Step 6: Push Schema to Production
+From your local machine, run:
 
-> ⚠️ **Warning**: Importing replaces ALL existing data!
+```bash
+# Pull Vercel env vars to a file (optional safety step) or just use the connection string directly if you have it.
+# Easiest way if you have the Vercel CLI linked:
+vercel env pull .env.production.local
 
-### Monthly Backup Reminder
-
-Set a monthly calendar reminder to export your backup. It takes 30 seconds and ensures your data is never lost.
-
----
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import the project in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Update Google OAuth redirect URI to your production domain
-
-### Environment Variables for Production
-
-```env
-DATABASE_URL=your-production-database-url
-AUTH_SECRET=your-production-secret
-AUTH_GOOGLE_ID=your-google-client-id
-AUTH_GOOGLE_SECRET=your-google-client-secret
-ADMIN_GOOGLE_SUB=your-google-sub-id
+# Push schema to the production DB
+npm run db:push -- --config=drizzle.config.ts
 ```
 
----
+*Note: Ensure your local `.env` or the pulled env file points `POSTGRES_URL` to the production database before running `db:push`.*
 
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run db:push` | Push schema to database |
-| `npm run db:studio` | Open Drizzle Studio |
+### Step 7: Redeploy
+If your initial deploy failed due to missing DB/Env vars, go to **Deployments** in Vercel and click **Redeploy**.
 
 ---
+
+## Admin Configuration
+
+To access the admin panel, you must be the "Shadow Admin".
+1. Log in with Google.
+2. If your `sub` ID matches `ADMIN_GOOGLE_SUB`, you will be redirected to `/shadow/admin`.
+3. If not, check "My Profile" or database/logs to find your `sub` ID and update the environment variable.
 
 ## License
 
-MIT
+MIT License. Feel free to clone and customize for your own portfolio!

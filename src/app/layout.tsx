@@ -32,7 +32,7 @@ export default async function RootLayout({
                 <Providers>
                     <Navbar name={name} />
                     <div className="flex-1">{children}</div>
-                    <Footer name={name} />
+                    <Footer name={name} githubUrl={profile?.githubUrl} linkedinUrl={profile?.linkedinUrl} />
                 </Providers>
             </body>
         </html>

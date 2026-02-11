@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function Footer({ name }: { name?: string | null }) {
+export function Footer({ name, githubUrl, linkedinUrl }: { name?: string | null, githubUrl?: string | null, linkedinUrl?: string | null }) {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/shadow");
 
@@ -29,7 +29,7 @@ export function Footer({ name }: { name?: string | null }) {
                     {/* Social Links */}
                     <div className="flex items-center gap-3">
                         <a
-                            href="https://github.com/Arpit-K-Sharma"
+                            href={githubUrl || "https://github.com"}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300"
@@ -40,7 +40,7 @@ export function Footer({ name }: { name?: string | null }) {
                             </svg>
                         </a>
                         <a
-                            href="https://linkedin.com/in/arpit-sharma"
+                            href={linkedinUrl || "https://linkedin.com"}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300"
