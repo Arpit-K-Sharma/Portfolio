@@ -6,17 +6,24 @@ import { Footer } from "@/components/footer";
 
 import { profileService } from "@/modules/profile";
 
-export const metadata: Metadata = {
-    title: "Arpit Sharma | Portfolio",
-    description: "Blockchain & Full-Stack Developer portfolio showcasing projects in Web3, DeFi, and modern web applications.",
-    keywords: ["blockchain", "full-stack", "developer", "portfolio", "web3", "solidity", "next.js"],
-    authors: [{ name: "Arpit Sharma" }],
-    openGraph: {
-        title: "Arpit Sharma | Portfolio",
-        description: "Blockchain & Full-Stack Developer",
-        type: "website",
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const profile = await profileService.getProfile();
+    const name = profile?.name || "Portfolio";
+    const title = `${name} | Portfolio`;
+
+    return {
+        title,
+        description: profile?.bio || "Blockchain & Full-Stack Developer portfolio showcasing projects in Web3, DeFi, and modern web applications.",
+        keywords: ["blockchain", "full-stack", "developer", "portfolio", "web3", "solidity", "next.js"],
+        authors: [{ name }],
+        openGraph: {
+            title,
+            description: profile?.title || "Blockchain & Full-Stack Developer",
+            type: "website",
+            images: profile?.avatarUrl ? [{ url: profile.avatarUrl }] : [],
+        },
+    };
+}
 
 export default async function RootLayout({
     children,
