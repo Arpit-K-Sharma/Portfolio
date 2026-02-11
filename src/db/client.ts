@@ -1,26 +1,20 @@
-import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
-import { sql } from "@vercel/postgres";
-import { drizzle as drizzleVercel } from "drizzle-orm/vercel-postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
 
-// Determine if we are in a Vercel environment or have Vercel Postgres configured
-const isVercel = !!process.env.POSTGRES_URL;
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-let db: any;
-
-if (isVercel) {
-    // Use Vercel Postgres SDK (optimized for serverless)
-    db = drizzleVercel(sql, { schema });
-} else {
-    // Use standard Postgres driver for local development
-    const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-    });
-    db = drizzlePg(pool, { schema });
+if (!connectionString) {
+    throw new Error("DATABASE_URL or POSTGRES_URL must be set");
 }
 
-export { db };
+const pool = new Pool({
+    connectionString,
+    // Add SSL for production/Vercel environments if needed, 
+    // but usually the connection string params handle it or Vercel environment implies it.
+    // For Prisma/Neon/Vercel Postgres via URL, 'sslmode=require' in string is key.
+});
 
-// Export for type inference (might need adjustment depending on your exact type needs)
+export const db = drizzle(pool, { schema });
+
 export type Database = typeof db;
