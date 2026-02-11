@@ -70,22 +70,42 @@ export const backupService = {
 
             // Import profile
             if (data.profile) {
-                await db.insert(profile).values(data.profile);
+                await db.insert(profile).values({
+                    ...data.profile,
+                    createdAt: new Date(data.profile.createdAt),
+                    updatedAt: new Date(data.profile.updatedAt),
+                });
             }
 
             // Import categories
             if (data.categories.length > 0) {
-                await db.insert(categories).values(data.categories);
+                await db.insert(categories).values(
+                    data.categories.map((c) => ({
+                        ...c,
+                        createdAt: new Date(c.createdAt),
+                    }))
+                );
             }
 
             // Import skills
             if (data.skills.length > 0) {
-                await db.insert(skills).values(data.skills);
+                await db.insert(skills).values(
+                    data.skills.map((s) => ({
+                        ...s,
+                        createdAt: new Date(s.createdAt),
+                    }))
+                );
             }
 
             // Import projects
             if (data.projects.length > 0) {
-                await db.insert(projects).values(data.projects);
+                await db.insert(projects).values(
+                    data.projects.map((p) => ({
+                        ...p,
+                        createdAt: new Date(p.createdAt),
+                        updatedAt: new Date(p.updatedAt),
+                    }))
+                );
             }
 
             // Import project-skill relations
