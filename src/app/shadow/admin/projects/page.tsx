@@ -480,13 +480,13 @@ export default function AdminProjectsPage() {
             )}
 
             {/* Projects List */}
-            <div className="bg-card/30 border border-white/5 rounded-2xl overflow-hidden">
+            <div className="bg-card/30 border border-white/5 rounded-2xl overflow-x-auto custom-scrollbar">
                 {projects.length === 0 ? (
                     <div className="p-12 text-center text-foreground-muted">No projects yet. Create your first project!</div>
                 ) : (
-                    <div className="divide-y divide-white/5">
+                    <div className="min-w-[700px] divide-y divide-white/5">
                         {/* Header */}
-                        <div className="grid grid-cols-[1fr_100px_80px_120px] gap-4 items-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">
+                        <div className="grid grid-cols-[1fr_100px_100px_140px] gap-4 items-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-foreground-muted bg-white/[0.02]">
                             <span>Project</span>
                             <span className="text-center">Featured</span>
                             <span className="text-center">Order</span>
@@ -496,22 +496,22 @@ export default function AdminProjectsPage() {
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className="grid grid-cols-[1fr_100px_80px_120px] gap-4 items-center px-5 py-3 hover:bg-white/[0.02] transition-colors"
+                                className="grid grid-cols-[1fr_100px_100px_140px] gap-4 items-center px-6 py-4 hover:bg-white/[0.03] transition-colors"
                             >
                                 {/* Project Info */}
                                 <div className="flex items-center gap-4 min-w-0">
-                                    <div className="w-10 h-10 rounded-lg bg-neutral-900 border border-white/10 flex-shrink-0 overflow-hidden">
+                                    <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/10 flex-shrink-0 overflow-hidden shadow-inner">
                                         {project.thumbnailUrl ? (
                                             <img src={project.thumbnailUrl} alt="" className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-foreground-muted">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17V7a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" /></svg>
+                                            <div className="w-full h-full flex items-center justify-center text-foreground-muted bg-white/5">
+                                                <svg className="w-6 h-6 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
                                             </div>
                                         )}
                                     </div>
                                     <div className="min-w-0">
                                         <h3 className="font-medium text-foreground truncate">{project.title}</h3>
-                                        <p className="text-xs text-foreground-muted truncate">
+                                        <p className="text-xs text-foreground-muted truncate mt-0.5">
                                             {project.categories.map(c => c.name).join(", ") || "No categories"}
                                         </p>
                                     </div>
@@ -526,7 +526,7 @@ export default function AdminProjectsPage() {
                                             onChange={(e) => handleInlineUpdate(project.id, "isFeatured", e.target.checked)}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                        <div className="w-10 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary shadow-sm"></div>
                                     </label>
                                 </div>
 
@@ -546,30 +546,30 @@ export default function AdminProjectsPage() {
                                                 (e.target as HTMLInputElement).blur();
                                             }
                                         }}
-                                        className="w-14 text-center bg-neutral-900 border border-white/10 rounded-lg py-1 text-sm text-foreground focus:border-primary/50 focus:outline-none transition-colors"
+                                        className="w-16 text-center bg-neutral-900/50 border border-white/10 rounded-lg py-1.5 text-sm text-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
                                     />
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex items-center justify-end gap-1">
+                                <div className="flex items-center justify-end gap-1.5">
                                     <Link
                                         href={`/projects/${project.slug}`}
                                         target="_blank"
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
+                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/5 text-foreground-muted hover:text-white hover:bg-white/[0.08] transition-all"
                                         title="View"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
                                     </Link>
                                     <button
                                         onClick={() => handleEdit(project)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-foreground-muted hover:text-foreground transition-all"
+                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/5 text-foreground-muted hover:text-white hover:bg-white/[0.08] transition-all"
                                         title="Edit"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
                                     </button>
                                     <button
                                         onClick={() => setDeleteTarget(project.id)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-foreground-muted hover:text-red-400 transition-all"
+                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/5 border border-red-500/10 text-foreground-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
                                         title="Delete"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>

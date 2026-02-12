@@ -99,18 +99,30 @@ export function ContactForm() {
     return (
         <form onSubmit={handleSubmit}>
             {/* Signed-in user info */}
-            <div className="flex items-center gap-3 p-4 bg-white/[0.03] rounded-xl mb-6 border border-white/[0.06]">
-                {session.user.image && (
-                    <img
-                        src={session.user.image}
-                        alt={session.user.name || ""}
-                        className="w-10 h-10 rounded-xl"
-                    />
-                )}
-                <div>
-                    <p className="font-medium text-sm">{session.user.name}</p>
-                    <p className="text-xs text-foreground-muted">{session.user.email}</p>
+            <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl mb-6 border border-white/[0.06]">
+                <div className="flex items-center gap-3">
+                    {session.user.image && (
+                        <img
+                            src={session.user.image}
+                            alt={session.user.name || ""}
+                            className="w-10 h-10 rounded-xl"
+                        />
+                    )}
+                    <div>
+                        <p className="font-medium text-sm">{session.user.name}</p>
+                        <p className="text-xs text-foreground-muted">{session.user.email}</p>
+                    </div>
                 </div>
+                <button
+                    type="button"
+                    onClick={() => {
+                        const { signOut } = require("next-auth/react");
+                        signOut();
+                    }}
+                    className="text-xs text-red-400/80 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-all duration-200 border border-red-500/20"
+                >
+                    Switch Account
+                </button>
             </div>
 
             <div className="mb-6">
