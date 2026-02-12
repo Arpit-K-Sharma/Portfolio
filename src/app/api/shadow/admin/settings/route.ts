@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { settingsService } from "@/modules/settings";
 import { Setting } from "@/modules/settings/settings.types";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
     const session = await auth();
@@ -38,6 +39,10 @@ export async function PATCH(request: Request) {
         }
 
         await settingsService.setSetting(key, value);
+
+        // Revalidate the projects page to ensure the setting change takes effect immediately
+        revalidatePath("/projects");
+
         return NextResponse.json({ success: true, key, value });
     } catch (error) {
         console.error("Failed to update setting:", error);
