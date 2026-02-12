@@ -29,11 +29,11 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
 
     // Parse initial state from URL
     const initialSearch = searchParams.get("search") || "";
-    const initialCategories = searchParams.get("category")
-        ? searchParams.get("category")!.split(",").filter(Boolean)
+    const initialCategories = searchParams.get("categories")
+        ? searchParams.get("categories")!.split(",").filter(Boolean)
         : [];
-    const initialSkills = searchParams.get("skill")
-        ? searchParams.get("skill")!.split(",").filter(Boolean)
+    const initialSkills = searchParams.get("skills")
+        ? searchParams.get("skills")!.split(",").filter(Boolean)
         : [];
 
     const [search, setSearch] = useState(initialSearch);
@@ -61,11 +61,11 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
         if (newFilters.search) params.set("search", newFilters.search);
 
         if (newFilters.categories.length > 0) {
-            params.set("category", newFilters.categories.join(","));
+            params.set("categories", newFilters.categories.join(","));
         }
 
         if (newFilters.skills.length > 0) {
-            params.set("skill", newFilters.skills.join(","));
+            params.set("skills", newFilters.skills.join(","));
         }
 
         router.replace(`/projects?${params.toString()}`, { scroll: false });
@@ -79,7 +79,7 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
                 categories: selectedCategories,
                 skills: selectedSkills
             });
-        }, 400);
+        }, 150); // Reduced from 400ms for snappier response
         return () => clearTimeout(timer);
     }, [search, selectedCategories, selectedSkills]); // Dependencies for search debounce only, but here we include all to keep state synced
 
@@ -146,8 +146,8 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
                     <button
                         onClick={() => setSelectedCategories([])}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${selectedCategories.length === 0
-                                ? "bg-white/[0.1] text-foreground border-white/[0.15] shadow-sm"
-                                : "bg-transparent border-transparent text-foreground-muted hover:text-foreground hover:bg-white/[0.05]"
+                            ? "bg-white/[0.1] text-foreground border-white/[0.15] shadow-sm"
+                            : "bg-transparent border-transparent text-foreground-muted hover:text-foreground hover:bg-white/[0.05]"
                             }`}
                     >
                         All
@@ -159,8 +159,8 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
                                 key={cat.id}
                                 onClick={() => toggleCategory(cat.slug)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${isSelected
-                                        ? "bg-primary/20 text-primary-light border-primary/30 shadow-sm shadow-primary/10"
-                                        : "bg-white/[0.05] border-white/[0.1] text-foreground-muted hover:bg-white/[0.08] hover:text-foreground hover:border-white/[0.15]"
+                                    ? "bg-primary/20 text-primary-light border-primary/30 shadow-sm shadow-primary/10"
+                                    : "bg-white/[0.05] border-white/[0.1] text-foreground-muted hover:bg-white/[0.08] hover:text-foreground hover:border-white/[0.15]"
                                     }`}
                             >
                                 {cat.name}
@@ -195,8 +195,8 @@ export function ProjectSearchFilters({ categories, skills }: ProjectSearchFilter
                                 key={s.id}
                                 onClick={() => toggleSkill(s.slug)}
                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${isSelected
-                                        ? "bg-primary/20 text-primary-light border-primary/30 shadow-sm shadow-primary/10"
-                                        : "bg-white/[0.05] border-white/[0.08] text-foreground-muted hover:bg-white/[0.08] hover:text-foreground hover:border-white/[0.15]"
+                                    ? "bg-primary/20 text-primary-light border-primary/30 shadow-sm shadow-primary/10"
+                                    : "bg-white/[0.05] border-white/[0.08] text-foreground-muted hover:bg-white/[0.08] hover:text-foreground hover:border-white/[0.15]"
                                     }`}
                             >
                                 {s.iconUrl && <SkillIcon icon={s.iconUrl} alt={s.name} className="w-3.5 h-3.5 opacity-90" />}

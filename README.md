@@ -41,11 +41,15 @@ npm install
 
 ### 2. Environment Setup
 
-Create a `.env.local` file in the root directory:
+Create a `.env.local` file in the root directory.
+
+**⚠️ IMPORTANT:** Do NOT use your production/Vercel database URL here. Using the same URL for local development will overwrite your live data. Always use a local PostgreSQL instance for development.
 
 ```env
-# Database Connection (PostgreSQL)
-DATABASE_URL="postgresql://user:password@localhost:5432/portfolio"
+# Database Connection (Local PostgreSQL)
+# ❌ Do NOT use the Vercel/Neon URL here!
+# ✅ Use a local connection string like:
+DATABASE_URL="postgresql://postgres:password@localhost:5432/portfolio"
 
 # NextAuth Secret (Generate with: npx auth secret)
 AUTH_SECRET="your-secure-random-string"
