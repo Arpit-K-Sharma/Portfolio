@@ -99,18 +99,18 @@ export function ContactForm() {
     return (
         <form onSubmit={handleSubmit}>
             {/* Signed-in user info */}
-            <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl mb-6 border border-white/[0.06]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/[0.03] rounded-xl mb-6 border border-white/[0.06]">
                 <div className="flex items-center gap-3">
                     {session.user.image && (
                         <img
                             src={session.user.image}
                             alt={session.user.name || ""}
-                            className="w-10 h-10 rounded-xl"
+                            className="w-10 h-10 rounded-xl shrink-0"
                         />
                     )}
-                    <div>
-                        <p className="font-medium text-sm">{session.user.name}</p>
-                        <p className="text-xs text-foreground-muted">{session.user.email}</p>
+                    <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{session.user.name}</p>
+                        <p className="text-xs text-foreground-muted truncate">{session.user.email}</p>
                     </div>
                 </div>
                 <button
@@ -119,7 +119,7 @@ export function ContactForm() {
                         const { signOut } = require("next-auth/react");
                         signOut();
                     }}
-                    className="text-xs text-red-400/80 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-all duration-200 border border-red-500/20"
+                    className="text-xs text-red-400/80 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-all duration-200 border border-red-500/20 w-fit"
                 >
                     Switch Account
                 </button>
